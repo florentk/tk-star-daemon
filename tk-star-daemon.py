@@ -4,11 +4,18 @@
 import socket
 import time
 import threading
+import sys
+import httplib
 
 TK_STAR_BINARY_DATA_MAGIC_NUMBER = b'\x24'
 #NORTH = b'\x30'
 #EAST = b'\x60'
 PORT_NUMBER = 7000
+
+#set of tuple (ssl,server,path)
+URLS = [ (False,"localhost","/myloc?lat=%f&lon=%f&id=1"),
+         (False,"lille.bike","/set_coursier_loc?lat=%f&lon=%f&id=5")    
+          ]
 
 def to_hexa_array(data):
   return ["%02x" % ord(d) for d in data]
@@ -56,28 +63,42 @@ def decode_tk_star_gps_data(data):
     return dev,timestamp,lat,lon
   return data  
   
-def gps_data_to_string(g):
-  if len(g) == 4 :
-    return "Device : %s\nTime : %s\nLatitude : %f\nLongitude : %f" % (g[0],time.ctime(g[1]),g[2],g[3])
-  else:
-    return str(g)
+def gps_data_to_string(dev,timestamp,lat,lon):
+    return "Device : %s\nTime : %s\nLatitude : %f\nLongitude : %f" % (dev,time.ctime(timestamp),lat,lon)
     
+def send_positions_http(ssl, serveur, ppath, lat, lon):
+  path = ppath % (lat,lon)
+  print "Send request to http%s://%s%s" % ('s' if ssl else '',serveur, path)
+  if(ssl):
+    c = httplib.HTTPSConnection(serveur)
+  else:
+    c = httplib.HTTPConnection(serveur)
+  c.request("GET", path)
+  r = c.getresponse()
+  print "Reponse :", r.status, r.reason
+    
+def process_data(g):
+    if len(g) == 4 :
+      (dev,timestamp,lat,lon)=g
+      for (ssl,server,path) in URLS :
+         send_positions_http(ssl,server,path,lat,lon)
+      print ""
+      print gps_data_to_string(dev,timestamp,lat,lon)
+    else:
+      print g
+      
 def service(client):
   try:
     while True:
       data = client.recv(1024)
       if len(data) > 0:
         print to_hexa_human_string(data)
-        print gps_data_to_string(decode_tk_star_gps_data(data))
-        print ""   
-  except :  
-    print address,"is deconnected"   
-    client.close() 
-  print address,"is deconnected"  
-  client.close() 
-  
-  
-  
+        print ""
+        process_data(decode_tk_star_gps_data(data))
+        print ""  
+        sys.stdout.flush() 
+  except :   
+    client.close()  
   
 class ClientThread(threading.Thread):
     def __init__(self, client, address):
@@ -93,6 +114,7 @@ def listen(port):
   s.bind(('', port))
 
   print "Listen on port" , port , "..."
+  sys.stdout.flush() 
 
   try:
     while True:
@@ -101,6 +123,7 @@ def listen(port):
       print "Connected by ", address
       client_thread = ClientThread(client,address) 
       client_thread.start()  
+      sys.stdout.flush()
   except :
     s.close()  
 
@@ -113,12 +136,16 @@ def test():
   d2 = b'\x2a\x48\x51\x2c\x34\x31\x30\x39\x31\x37\x39\x30\x32\x36\x2c\x56\x31\x2c\x32\x30\x31\x37\x32\x37\x2c\x41\x2c\x35\x30\x33\x37\x2e\x37\x30\x33\x39\x2c\x4e\x2c\x30\x30\x33\x30\x34\x2e\x36\x36\x30\x32\x2c\x45\x2c\x30\x30\x30\x2e\x30\x30\x2c\x30\x30\x30\x2c\x31\x35\x30\x31\x31\x37\x2c\x46\x46\x46\x46\x46\x42\x46\x46\x2c\x32\x30\x38\x2c\x30\x31\x2c\x30\x2c\x30\x2c\x36\x23'
   print '-----------------------------------------------'  
   print to_hexa_human_string(d1)
-  print gps_data_to_string(decode_tk_star_gps_data(d1))
+  print ""
+  process_data(decode_tk_star_gps_data(d1))
+  print ""  
   print '-----------------------------------------------'
   print to_hexa_human_string(d2)
-  print gps_data_to_string(decode_tk_star_gps_data(d2))
+  print ""
+  process_data(decode_tk_star_gps_data(d2))
+  print ""  
   print '-----------------------------------------------'
   
 if __name__ == "__main__":
-   main()
-   #test()
+   #main()
+   test()
