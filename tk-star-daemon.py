@@ -1,5 +1,22 @@
 #!/usr/bin/env python2.7
 # -*- coding: utf-8 -*-
+#
+#    This program reads data from the TK-STAR GPS tracker and sends with HTTP
+#
+#    Author : Florent Kaisser <florent.dev@kaisser.name>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import socket
 import time
@@ -147,5 +164,5 @@ def test():
   print '-----------------------------------------------'
   
 if __name__ == "__main__":
-   #main()
-   test()
+   main()
+   #test()
