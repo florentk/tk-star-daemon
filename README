@@ -2,13 +2,13 @@ Ce programme permet de lire les données envoyées par le traceur GPS de marque 
 
 Les données sont envoyés par le traceur au serveur à intervalle régulier. Vous pouvez configurer l'adresse IP du serveur et le port TCP avec la commande "adminip" envoyé par SMS au traceur. 
 
-Deux types de format de données sont utilisés par le traceur. Un format texte qui ressemble au format utilisé habituellement par les récepteur GPS : 
+Deux types de format de données sont utilisés par le traceur. Un format texte qui ressemble au format utilisé habituellement par les récepteurs GPS (NMEA) : 
 
 *HQ,4109179026,V1,201727,A,5037.7039,N,00304.6602,E,000.00,000,150117,FFFFFBFF,208,01,0,0,6#
 
 Ce type de donnée n'est pas envoyé à l'intervalle donné, mais de manière aléatoire.
 
-L'autre format de donnée qui est envoyé à intervalle régulier (définit par la commande "upload" du traceur), est lui binaire. La trame envoyée par le traceur en binaire à une longueur fixe de 45 octets et est décomposée ainsi :
+L'autre format de donnée est binaire et est envoyé à intervalle régulier (définit par la commande "upload" du traceur). La trame envoyée par le traceur en binaire à une longueur fixe de 45 octets et est décomposée ainsi :
 
 0 : magic number (0x24)
 1-5 : identifiant du traceur
@@ -39,4 +39,4 @@ Time : Sun Jan 17 11:09:27 2016
 Latitude : 50.628217
 Longitude : 3.077917
 
-On peut remarquer que l'encodage des entier et flotant est très particulier. Par exemple, l'heure (ici 17) est encodé en 0x17 (23 en décimale) et non 0x11 (17 en décimale). Pour la position, le format est décomposé ainsi : degré/partie entière de la minute/première partie de la partie décimale de la minute/seconde partie décimale  de la minute. Par exemple 50°37.6930' (50.628217 ou 50°37'41.58'') est encodé par 50:37:69:30.
+On peut remarquer que l'encodage des entiers et flottants est très particulier. Par exemple, l'heure (ici 17) est encodé en 0x17 (23 en décimale) et non 0x11 (17 en décimale). Pour la position, le format est décomposé ainsi : degré/partie entière de la minute/première partie de la partie décimale de la minute/seconde partie décimale  de la minute. Par exemple la latitude 50°37.6930' (50.628217 ou 50°37'41.58'') est encodé par 50:37:69:30.
